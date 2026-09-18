@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#142f35" />
+    <meta name="description" content="一座可以步入庭院、回廊、高塔与下层遗迹的连续三维天空之城。" />
+    <title>天空之城 · 连续三维漫游</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <main id="app" aria-label="天空之城三维漫游">
+      <canvas id="world-canvas" tabindex="0" aria-label="可交互的天空之城三维场景"></canvas>
+
+      <div id="loading" class="loading" role="status" aria-live="polite">
+        <div class="loading__sigil" aria-hidden="true"><span></span></div>
+        <p class="eyebrow">LAPUTA · CONTINUOUS WORLD</p>
+        <h1>云层正在让出道路</h1>
+        <p id="loading-copy">搭建同一座岛上的庭院、回廊与高塔…</p>
+        <div class="loading__bar"><span id="loading-progress"></span></div>
+      </div>
+
+      <header class="topbar glass">
+        <button id="brand" class="brand" aria-label="打开操作帮助">
+          <span class="brand__mark" aria-hidden="true">✦</span>
+          <span><small>天空之城</small><strong>同一座岛 · 八个区域</strong></span>
+        </button>
+        <div class="topbar__actions">
+          <button id="quality-button" class="text-button" aria-label="切换画质">画质：高</button>
+          <button id="sound-button" class="icon-button" aria-pressed="false" aria-label="环境声音尚未启用">♬</button>
+          <button id="help-button" class="icon-button" aria-haspopup="dialog" aria-label="操作帮助">?</button>
+        </div>
+      </header>
+
+      <section class="location-card glass" aria-live="polite">
+        <p class="eyebrow"><span id="area-code">A</span> · CURRENT AREA</p>
+        <h2 id="area-name">云海停泊台</h2>
+        <p id="area-description">旧日航船靠岸的南侧平台，石桥从云雾中通向城门。</p>
+        <div class="location-card__route"><span></span><em id="route-status">自由漫游</em></div>
+      </section>
+
+      <aside class="map-panel glass" aria-label="区域小地图">
+        <div class="map-panel__head">
+          <span>浮岛导览图</span><small id="position-readout">0 · 2 · 62</small>
+        </div>
+        <div id="mini-map" class="mini-map" role="group" aria-label="选择目的区域">
+          <svg viewBox="0 0 220 170" aria-hidden="true">
+            <path class="map-island" d="M44 142 22 105 39 55 82 22l72 7 43 38-9 57-45 32-62 3Z" />
+            <path class="map-route" d="M108 144 104 122 104 94 117 72 152 68 166 37 58 67 52 115 108 144" />
+            <path class="map-route map-route--branch" d="M117 72 73 91 52 115" />
+          </svg>
+          <button data-area="A" style="--x:49%;--y:82%"><b>A</b><span>停泊台</span></button>
+          <button data-area="B" style="--x:47%;--y:69%"><b>B</b><span>城门</span></button>
+          <button data-area="C" style="--x:47%;--y:53%"><b>C</b><span>巨树</span></button>
+          <button data-area="D" style="--x:55%;--y:40%"><b>D</b><span>拱廊</span></button>
+          <button data-area="E" style="--x:72%;--y:38%"><b>E</b><span>花园</span></button>
+          <button data-area="F" style="--x:78%;--y:20%"><b>F</b><span>高塔</span></button>
+          <button data-area="G" style="--x:35%;--y:52%"><b>G</b><span>大厅</span></button>
+          <button data-area="H" style="--x:25%;--y:68%"><b>H</b><span>外墙</span></button>
+          <i id="map-player" aria-hidden="true"></i>
+        </div>
+      </aside>
+
+      <nav class="action-dock glass" aria-label="漫游操作">
+        <button id="overview-button"><span>⌁</span><b>整岛总览</b></button>
+        <button id="tour-button"><span>▷</span><b>自动导览</b></button>
+        <button id="reset-button"><span>↺</span><b>安全复位</b></button>
+      </nav>
+
+      <div id="movement-hint" class="movement-hint glass">
+        <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 行走</span>
+        <i></i>
+        <span>拖动环顾 · 点击光环前往</span>
+      </div>
+
+      <div id="reticle" class="reticle" aria-hidden="true"><span></span></div>
+      <div id="area-toast" class="area-toast" aria-hidden="true"><small>进入区域</small><strong></strong></div>
+
+      <section id="overview-panel" class="overview-panel glass" aria-hidden="true">
+        <p class="eyebrow">ISLAND OVERVIEW</p>
+        <h2>整岛总览</h2>
+        <p>拖动旋转，滚轮缩放。八个区域仍在同一个世界中。</p>
+        <button id="return-button" class="primary-button">返回原位置</button>
+      </section>
+
+      <dialog id="help-dialog" class="help-dialog">
+        <button id="help-close" class="dialog-close" aria-label="关闭">×</button>
+        <p class="eyebrow">HOW TO EXPLORE</p>
+        <h2>进入这座浮岛</h2>
+        <div class="help-grid">
+          <article><span>01</span><h3>点击前往</h3><p>选择场景中的青色光环，或点击小地图区域，沿真实通道移动。</p></article>
+          <article><span>02</span><h3>自由行走</h3><p>按 WASD 沿道路行走，拖动鼠标或手指观察。任何手动输入都会停止导览。</p></article>
+          <article><span>03</span><h3>理解空间</h3><p>总览只改变相机；庭院、高塔和大厅始终属于眼前同一座岛。</p></article>
+        </div>
+        <button id="help-start" class="primary-button">开始漫游</button>
+      </dialog>
+
+      <section id="error-panel" class="error-panel" hidden>
+        <p class="eyebrow">WEBGL2 REQUIRED</p>
+        <h1>当前浏览器无法显示三维浮岛</h1>
+        <p>请使用已开启硬件加速的新版 Chrome 或 Edge，然后重新打开本地启动入口。</p>
+      </section>
+    </main>
+    <script type="module" src="/src/app.js"></script>
+  </body>
+</html>

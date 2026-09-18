@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0c1c29">
+<meta name="description" content="在暮色与云海之间，漫游一座被巨树守护的天空之城。离线观赏场景。">
+<title>天空之城 · 云上漫游</title>
+<style>
+:root { color-scheme: dark; --night-blue:#0c1c29; --twilight:#526a74; --copper:#d4b783; --moss:#758575; --cream:#eee7d4; }
+* { box-sizing:border-box; }
+html,body { margin:0; background:var(--night-blue); color:var(--cream); }
+body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; }
+button { font:inherit; color:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+button:focus-visible { outline:2px solid #fff0b5; outline-offset:7px; }
+button:disabled { cursor:default; }
+[hidden] { display:none !important; }
+.scene-app { position:relative; isolation:isolate; min-height:100svh; }
+.scene-stage { position:relative; height:100svh; min-height:660px; overflow:hidden; background:var(--night-blue); }
+.sky-layer { position:absolute; inset:0; background:linear-gradient(180deg,#081b2a,#3a5963 54%,#d0a77e 100%); }
+.art-layer { position:absolute; inset:0; pointer-events:none; }
+#world-art { display:block; width:100%; height:100%; }
+.atmosphere { position:absolute; inset:0; pointer-events:none; background:linear-gradient(90deg,rgba(7,21,30,.68),transparent 52%),linear-gradient(0deg,rgba(6,18,28,.92),transparent 25%); }
+.vignette { position:absolute; inset:0; pointer-events:none; box-shadow:inset 0 0 150px 25px #07182777; }
+.grain { position:absolute; inset:0; pointer-events:none; opacity:.07; }
+.scene-topbar { position:absolute; top:max(32px,env(safe-area-inset-top)); left:4.8%; right:4.8%; display:flex; align-items:center; justify-content:space-between; gap:16px; z-index:4; }
+.wordmark { display:flex; gap:14px; align-items:center; font-size:11px; letter-spacing:.2em; }
+.brand-seal { width:28px; height:28px; border:1px solid #d4b78388; display:grid; place-items:center; transform:rotate(45deg); }
+.brand-seal span { transform:rotate(-45deg); font-family:serif; font-size:15px; }
+.wordmark small { display:block; margin-top:5px; color:#c2c7bf; font-size:9px; letter-spacing:.28em; }
+.top-actions { display:flex; align-items:center; gap:26px; }
+.mode-label { font-size:10px; letter-spacing:.13em; color:#d7d7c9; }
+.mode-label::before { content:""; display:inline-block; width:4px; height:4px; background:#ddc694; border-radius:50%; margin-right:9px; box-shadow:0 0 8px #dfc27a; }
+.text-button { min-height:44px; min-width:44px; flex-shrink:0; border:0; background:transparent; padding:8px 0 8px 12px; font-size:11px; letter-spacing:.08em; }
+.text-button:hover { color:#ffdfa4; }
+.scene-copy { position:absolute; left:7.6%; top:24%; width:34%; max-width:470px; z-index:2; }
+.eyebrow { display:flex; gap:14px; align-items:center; color:var(--copper); font-size:10px; letter-spacing:.32em; margin:0 0 28px; }
+.eyebrow::before { content:""; width:38px; height:1px; background:var(--copper); }
+h1 { font-family:"Songti SC","STSong","SimSun",serif; font-size:clamp(46px,5.6vw,84px); font-weight:400; line-height:1.25; letter-spacing:.15em; margin:0 0 22px; text-shadow:0 3px 30px #081721; }
+h1:focus { outline:none; }
+.scene-tagline { font-family:"Songti SC","STSong","SimSun",serif; font-size:clamp(16px,1.5vw,23px); line-height:1.8; letter-spacing:.18em; color:#dfd7c2; margin:0; }
+.copy-divider { margin:30px 0 21px; width:26px; height:1px; background:#d4b78388; }
+#scene-description { max-width:290px; font-size:12px; line-height:2.15; letter-spacing:.09em; color:#c3ccc5; margin:0; }
+.scene-index { margin:25px 0 0; font-family:Georgia,serif; font-size:11px; letter-spacing:.16em; color:#aab5af; }
+.scene-index strong { color:var(--copper); font-size:18px; font-weight:400; }
+.scene-hotspots { position:absolute; inset:0; z-index:3; pointer-events:none; }
+.hotspot { position:absolute; display:flex; align-items:center; gap:12px; padding:12px; min-height:48px; background:transparent; border:0; pointer-events:auto; text-align:left; }
+.hotspot .marker { display:grid; place-items:center; width:29px; height:29px; border:1px solid #ddc492aa; border-radius:50%; font:11px Georgia,serif; color:#ffe6b9; background:#0e283a66; box-shadow:0 0 0 6px #d5b47a0c; transition:box-shadow .25s,background .25s; }
+.hotspot .label { display:block; font-family:"Songti SC","STSong","SimSun",serif; font-size:15px; letter-spacing:.15em; text-shadow:0 2px 10px #001421; }
+.hotspot .hint { display:block; font-size:9px; letter-spacing:.1em; color:#cad0c5; margin-top:6px; opacity:0; transform:translateY(4px); transition:opacity .25s,transform .25s; }
+.hotspot:hover .marker,.hotspot:focus-visible .marker { background:#d8bd8366; box-shadow:0 0 0 8px #d5b47a20,0 0 25px #d5b47a30; }
+.hotspot:hover .hint,.hotspot:focus-visible .hint { opacity:1; transform:none; }
+.hotspot[data-scene="cloud"] { left:43%; top:65%; }
+.hotspot[data-scene="courtyard"] { left:65%; top:48%; }
+.hotspot[data-scene="tower"] { left:80%; top:29%; }
+.scene-controls { position:absolute; left:4.8%; right:4.8%; bottom:max(28px,env(safe-area-inset-bottom)); display:flex; align-items:center; justify-content:space-between; gap:20px; z-index:4; padding-top:21px; border-top:1px solid #c9c7af26; }
+.view-note { font-size:10px; letter-spacing:.12em; color:#bfc9c5; line-height:1.8; }
+.view-note span { color:var(--copper); margin-right:14px; }
+.control-right { display:flex; align-items:center; gap:28px; }
+.coordinate { color:#aebbb6; font:10px Georgia,serif; letter-spacing:.15em; }
+.motion-button { min-height:44px; display:flex; align-items:center; gap:9px; border:1px solid #d4b78355; background:#0c233666; padding:0 17px; font-size:10px; letter-spacing:.08em; border-radius:2px; }
+.motion-button:hover:not(:disabled) { border-color:#e4c790; background:#d4b7831c; }
+.motion-icon { width:9px; height:10px; border-left:2px solid currentColor; border-right:2px solid currentColor; }
+[aria-pressed="true"] .motion-icon { height:0; width:0; border:5px solid transparent; border-left:8px solid currentColor; margin-right:-4px; }
+.motion-button:disabled { color:#c1c9bd; border-color:#c1c9bd44; }
+.scene-transition { position:absolute; inset:0; z-index:10; pointer-events:none; display:grid; place-content:center; text-align:center; opacity:0; background:#0b1b28; transition:opacity 280ms ease; }
+.scene-transition span { display:block; font:24px "Songti SC","SimSun",serif; letter-spacing:.25em; }
+.scene-transition small { color:var(--copper); margin-top:16px; font-size:9px; letter-spacing:.35em; }
+.is-transitioning .scene-transition { opacity:1; pointer-events:auto; }
+.scene-art { display:none; }
+[data-scene="home"] .art-home,[data-scene="cloud"] .art-cloud,[data-scene="courtyard"] .art-courtyard,[data-scene="tower"] .art-tower { display:inline; }
+[data-scene="courtyard"] .atmosphere { background:linear-gradient(90deg,#081c2dbb,transparent 55%),linear-gradient(0deg,#071622ee,transparent 28%); }
+[data-scene="tower"] .atmosphere { background:linear-gradient(90deg,#091c2dcc,transparent 58%),linear-gradient(0deg,#071622ee,transparent 25%); }
+.interactive { display:none; }
+.is-ready .interactive { display:flex; }
+.is-ready .scene-hotspots:not([hidden]) { display:block; }
+.sr-only { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+noscript { position:absolute; z-index:5; bottom:95px; left:4.8%; right:4.8%; padding:12px 16px; background:#0b2136dd; color:#e8dec3; font-size:12px; line-height:1.8; }
+.cloud-near { animation:cloud-drift 50s ease-in-out infinite alternate; }
+.cloud-far { animation:cloud-drift 80s ease-in-out infinite alternate-reverse; }
+.floating { animation:city-float 10s ease-in-out infinite; }
+.sun-glow { animation:glow-pulse 9s ease-in-out infinite alternate; }
+.birds { animation:bird-flight 34s linear infinite; }
+.birds.slow { animation-duration:49s; animation-delay:-21s; }
+.mote { animation:mote-shimmer 6s ease-in-out infinite; }
+.mote:nth-child(2n) { animation-delay:-2s; }
+.mote:nth-child(3n) { animation-delay:-4s; }
+.is-paused .ambient,.is-paused .ambient::before,.is-paused .ambient::after { animation-play-state: paused !important; }
+.scene-app:not(.is-ready) .ambient { animation:none !important; }
+@keyframes cloud-drift { from { transform:translateX(-28px); } to { transform:translateX(36px); } }
+@keyframes city-float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-9px); } }
+@keyframes glow-pulse { from { opacity:.45; } to { opacity:.85; } }
+@keyframes bird-flight { from { transform:translate(-230px,25px); } to { transform:translate(330px,-28px); } }
+@keyframes mote-shimmer { 0%,100% { opacity:.15; } 50% { opacity:.85; } }
+@media (min-width:1800px) { .scene-copy { left:10%; } }
+@media (max-width: 720px) {
+ .scene-stage { min-height:720px; }
+ .scene-topbar { top:max(22px,env(safe-area-inset-top)); left:24px; right:24px; }
+ .wordmark { font-size:10px; gap:11px; }
+ .wordmark small { font-size:8px; }
+ .top-actions { gap:10px; }
+ .scene-app:not([data-scene="home"]) .top-actions .mode-label { display:none; }
+ .mode-label { font-size:9px; letter-spacing:0; }
+ .text-button { font-size:10px; padding-left:0; }
+ .scene-copy { left:28px; top:16%; width:calc(100% - 56px); max-width:400px; }
+ .eyebrow { font-size:8px; margin-bottom:17px; letter-spacing:.28em; }
+ h1 { font-size:48px; letter-spacing:.13em; margin-bottom:13px; }
+ .scene-tagline { font-size:16px; letter-spacing:.1em; }
+ .copy-divider { margin:16px 0 12px; }
+ #scene-description { font-size:10px; line-height:1.95; max-width:265px; }
+ .scene-index { display:none; }
+ .art-layer { width:170svh; min-width:1224px; left:50%; right:auto; transform:translateX(-61.8%); }
+ .art-home { transform-origin:992px 530px; transform:translateY(90px) scale(.76); }
+ .cloud-city { transform-origin:1065px 400px; transform:translate(-30px,90px) scale(.8); }
+ .tower-light { transform:translateX(-120px); }
+ #sun-tower { transform-origin:1000px 560px; transform:translateY(75px) scale(.82); }
+ .atmosphere { background:linear-gradient(180deg,#091c2d88,transparent 52%),linear-gradient(0deg,#071622f5,transparent 34%); }
+ .is-ready .scene-hotspots:not([hidden]) { inset:auto 22px 111px; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; }
+ .hotspot[data-scene] { position:relative; left:auto; top:auto; display:flex; flex-direction:column; gap:10px; align-items:center; padding:12px 2px; background:#0b223747; border-top:1px solid #c9b68155; text-align:center; min-height:81px; }
+ .hotspot .marker { width:24px; height:24px; font-size:10px; }
+ .hotspot .label { font-size:12px; letter-spacing:.07em; }
+ .hotspot .hint { display:none; }
+ .scene-controls { left:24px; right:24px; bottom:max(23px,env(safe-area-inset-bottom)); gap:10px; padding-top:12px; }
+ .view-note { font-size:9px; letter-spacing:.06em; max-width:170px; }
+ .view-note span { display:block; margin-right:0; }
+ .control-right { gap:0; }
+ .coordinate { display:none; }
+ .motion-button { padding:0 10px; font-size:9px; }
+ .vignette { box-shadow:inset 0 0 90px #08182666; }
+ [data-scene="courtyard"] .atmosphere,[data-scene="tower"] .atmosphere { background:linear-gradient(180deg,#091c2da8,transparent 56%),linear-gradient(0deg,#071622f0,transparent 34%); }
+ noscript { bottom:95px; }
+}
+@media (max-width:360px) { .scene-topbar { left:18px; right:18px; } .brand-seal { width:23px; height:23px; } .wordmark { font-size:9px; } .top-actions .mode-label { display:none; } .scene-copy { left:22px; width:calc(100% - 44px); } h1 { font-size:41px; } .view-note { max-width:140px; } }
+@media (min-width:721px) and (max-height:660px) { .scene-stage { height:660px; } .scene-copy { top:22%; } h1 { font-size:54px; } .copy-divider { margin:20px 0 15px; } }
+@media (prefers-reduced-motion: reduce) { .ambient { animation:none !important; } *,*::before,*::after { transition:none !important; scroll-behavior:auto !important; } }
+</style>
+</head>
+<body>
+<main id="scene-app" class="scene-app" data-scene="home">
+ <div id="scene-stage" class="scene-stage">
+  <div class="sky-layer" aria-hidden="true"></div>
+  <div class="art-layer" aria-hidden="true">
+  <svg id="world-art" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+   <defs>
+    <linearGradient id="sky" x2=".22" y2="1"><stop stop-color="#091b2b"/><stop offset=".48" stop-color="#44646e"/><stop offset=".77" stop-color="#a9a797"/><stop offset="1" stop-color="#d7b28b"/></linearGradient>
+    <radialGradient id="sun-halo"><stop stop-color="#ffeac1" stop-opacity=".7"/><stop offset=".24" stop-color="#e9c893" stop-opacity=".24"/><stop offset="1" stop-color="#e1ad7d" stop-opacity="0"/></radialGradient>
+    <linearGradient id="stone" x2=".7" y2="1"><stop stop-color="#879382"/><stop offset=".4" stop-color="#586f67"/><stop offset="1" stop-color="#1e4045"/></linearGradient>
+    <linearGradient id="stone-lit" x2="1" y2=".25"><stop stop-color="#304d4e"/><stop offset=".75" stop-color="#778677"/><stop offset="1" stop-color="#b2aa8a"/></linearGradient>
+    <linearGradient id="rock" x2=".7" y2="1"><stop stop-color="#294a4b"/><stop offset=".65" stop-color="#17383f"/><stop offset="1" stop-color="#112a35"/></linearGradient>
+    <linearGradient id="canopy" x2=".8" y2="1"><stop stop-color="#b3b394"/><stop offset=".27" stop-color="#738f77"/><stop offset=".7" stop-color="#385f58"/><stop offset="1" stop-color="#1a4144"/></linearGradient>
+    <linearGradient id="bark" x2="1" y2="0"><stop stop-color="#233f3f"/><stop offset=".52" stop-color="#51675a"/><stop offset=".8" stop-color="#897f63"/><stop offset="1" stop-color="#bab18a"/></linearGradient>
+    <linearGradient id="cloud-light" x2="0" y2="1"><stop stop-color="#f0dec0" stop-opacity=".9"/><stop offset=".44" stop-color="#b9c5ba" stop-opacity=".7"/><stop offset="1" stop-color="#6f9498" stop-opacity="0"/></linearGradient>
+    <linearGradient id="cloud-dark" x2=".1" y2="1"><stop stop-color="#9fb7b3" stop-opacity=".45"/><stop offset="1" stop-color="#4c7480" stop-opacity="0"/></linearGradient>
+    <linearGradient id="sunset" x2="0" y2="1"><stop stop-color="#102738"/><stop offset=".46" stop-color="#73848a"/><stop offset=".73" stop-color="#d7ae83"/><stop offset="1" stop-color="#daca9d"/></linearGradient>
+    <linearGradient id="shaft" x2="0" y2="1"><stop stop-color="#f8d99c" stop-opacity=".25"/><stop offset="1" stop-color="#f8d99c" stop-opacity="0"/></linearGradient>
+    <filter id="cloud-soft" x="-20%" y="-40%" width="140%" height="180%"><feGaussianBlur stdDeviation="9"/></filter>
+    <filter id="far-soft"><feGaussianBlur stdDeviation="2"/></filter>
+    <filter id="paper-grain"><feTurbulence type="fractalNoise" baseFrequency=".72" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+    <pattern id="masonry" width="45" height="28" patternUnits="userSpaceOnUse"><path d="M0 0H45M0 28H45M22 0V14M0 14H45M9 14V28" fill="none" stroke="#d3ccaa" stroke-opacity=".11" stroke-width="1"/></pattern>
+    <g id="arch"><path d="M0 66V26Q0 0 19 0Q38 0 38 26V66" fill="#112f37"/><path d="M-5 66V25Q-5-5 19-5Q43-5 43 25V66" fill="none" stroke="#a2aa8d" stroke-width="5"/><path d="M6 66V27Q6 8 19 8" fill="none" stroke="#081f2a" stroke-width="4"/></g>
+    <g id="bird"><path d="M-11 1Q-6-5 0 1Q5-7 13-3" fill="none" stroke="#1b3540" stroke-width="1.8" stroke-linecap="round"/></g>
+    <g id="tree-shape">
+     <path d="M-70 250Q-17 232-18 167L-21 86Q-25 34-72-10L-118-44Q-77-34-31 1L-41-73L-13-13Q1 15 13-43L38-93L29-8Q61-42 121-51Q81-18 50 24L28 67Q20 93 24 160Q28 218 85 247Q28 240 6 218Q-10 243-70 250Z" fill="url(#bark)"/>
+     <path d="M-5 211Q9 158-1 108Q-12 61-9 21M18 164Q17 91 42 38M-33 210Q-24 175-31 152" fill="none" stroke="#c6b389" stroke-opacity=".35" stroke-width="3"/>
+     <path d="M-169-3Q-222-13-221-46Q-221-76-181-83Q-193-117-153-131Q-135-164-98-153Q-72-191-30-172Q5-199 46-173Q90-178 117-148Q158-153 177-121Q217-110 212-79Q244-50 210-24Q204 5 163 7Q136 35 94 17Q57 46 24 22Q-9 47-45 22Q-83 43-111 18Q-145 32-169-3Z" fill="url(#canopy)"/>
+     <g fill="#b1b494" opacity=".26"><ellipse cx="-95" cy="-114" rx="56" ry="26"/><ellipse cx="-26" cy="-149" rx="46" ry="18"/><ellipse cx="64" cy="-130" rx="54" ry="24"/><ellipse cx="150" cy="-77" rx="38" ry="22"/><ellipse cx="-176" cy="-59" rx="27" ry="19"/></g>
+     <g fill="#234e48" opacity=".48"><ellipse cx="-91" cy="-23" rx="48" ry="22"/><ellipse cx="68" cy="-13" rx="58" ry="22"/><ellipse cx="169" cy="-28" rx="31" ry="16"/><ellipse cx="-15" cy="-67" rx="51" ry="21"/></g>
+     <g stroke="#d2c99c" stroke-width="1.2" opacity=".35" fill="none"><path d="M-164-96l14-8m12-21 12-5m31-8 12 1m-53 65 10-6m73-72 17 2m43 12 11 5m43-3 13 5m22 27 15 4m24 18 9 8m-102-11 15-2m-160 13 12-6m-51 40 13 6"/></g>
+    </g>
+    <g id="city-shape">
+     <path d="M-286 145Q-245 233-177 276L-143 294L-119 336L-90 299L-60 363L-27 330L0 405L34 321L68 357L96 294L141 328L159 285Q241 252 286 145Z" fill="url(#rock)"/>
+     <path d="M-240 193L-177 276L-119 336L-132 243M-142 198L-60 363L-62 258M-37 204L0 405L27 222M73 201L68 357L119 246M157 190L141 328L218 226" fill="none" stroke="#47635c" stroke-opacity=".4" stroke-width="3"/>
+     <path d="M-295 119Q-287 79-228 54Q-91 10 61 29Q254 45 294 114L274 163Q203 222 0 230Q-203 222-274 163Z" fill="url(#stone)"/>
+     <ellipse cy="121" rx="295" ry="90" fill="url(#stone-lit)"/>
+     <path d="M-282 126Q-247 189 0 195Q248 189 281 126M-271 157Q-214 220 0 222Q215 218 271 155" fill="none" stroke="#b3b49a" stroke-opacity=".55" stroke-width="4"/>
+     <path d="M-263 110Q-174 45 0 48Q179 46 265 111Q223 153 0 164Q-209 152-263 110Z" fill="#496b5b"/>
+     <path d="M-211 91V31L-197 25V7H-178V23L-163 29V63M-143 65V-7L-132-19V-36H-110V-17L-99-7V52M160 74V-17L174-28V-49H195V-26L211-16V102" fill="url(#stone-lit)"/>
+     <path d="M-220 66Q-129 6 0 17Q142 13 232 78L225 115Q152 85 0 81Q-153 80-224 116Z" fill="url(#stone)"/>
+     <path d="M-218 64Q-129 7 0 17Q138 16 231 77" fill="none" stroke="#c2b998" stroke-width="3"/>
+     <path d="M-200 64V48h13V57h19V33h15V41h23V25h15V30h23V16h17V21h26V11h18V16h25V8h19V13h28V12h19V20h24V21h18V31h21V32h16V46h22V45h15V59h21V59h16V75" fill="none" stroke="#93a087" stroke-width="7"/>
+     <g transform="translate(-210 104) scale(.5)"><use href="#arch"/><use href="#arch" x="85" y="30"/><use href="#arch" x="170" y="49"/><use href="#arch" x="255" y="63"/><use href="#arch" x="340" y="69"/><use href="#arch" x="425" y="67"/><use href="#arch" x="510" y="59"/><use href="#arch" x="595" y="41"/><use href="#arch" x="680" y="19"/><use href="#arch" x="765" y="-13"/></g>
+     <path d="M-206 91Q-221 146-194 190M-167 62Q-185 92-167 119Q-153 150-176 202M190 69Q174 101 188 150Q205 181 191 204" fill="none" stroke="#254e48" stroke-width="6"/>
+     <path d="M-206 95l-19 11m22 12 16 9m-13 26-18 7m46-48 18-8m-18 54-14 9m361-55 16 5m-8 21-19 12" stroke="#688668" stroke-width="5" stroke-linecap="round"/>
+     <path d="M-33 126Q0 98 37 122L65 183H-66Z" fill="#7e8f74"/><path d="M-52 172H53M-46 162H48M-39 152H43M-30 142H36" stroke="#c0b99a" stroke-width="2" opacity=".55"/>
+     <use href="#tree-shape" transform="translate(1 -65) scale(.73)"/>
+     <path d="M-21 109Q-30 176-10 228Q18 267 0 319M24 111Q37 175 70 219Q88 245 72 277M-51 114Q-84 174-114 191Q-140 225-119 252" fill="none" stroke="#7a8063" stroke-width="6"/>
+     <path d="M-15 226Q-35 243-29 272M14 268Q34 287 21 306M77 219Q115 236 106 260" fill="none" stroke="#a29a73" stroke-width="2"/>
+     <g fill="#daca99"><rect x="-131" y="-5" width="5" height="14" opacity=".5"/><rect x="180" y="-11" width="6" height="18" opacity=".75"/><rect x="-189" y="39" width="4" height="10" opacity=".45"/></g>
+     <path d="M-229 204Q-252 247-231 267L-216 248ZM232 211l-17 39 17 19 18-33Z" fill="#294b4a"/>
+    </g>
+   </defs>
+   <rect width="1600" height="900" fill="url(#sky)"/>
+   <g class="ambient sun-glow"><ellipse cx="1190" cy="330" rx="440" ry="360" fill="url(#sun-halo)"/><path d="M1217 290L659 900H1023L1244 290Z" fill="url(#shaft)"/></g>
+   <circle cx="1202" cy="320" r="33" fill="#f5dab0" opacity=".79"/>
+   <g fill="#dfd9b7" opacity=".45"><circle cx="301" cy="106" r="1"/><circle cx="534" cy="75" r="1.2"/><circle cx="749" cy="136" r=".8"/><circle cx="1361" cy="120" r="1.1"/><circle cx="1445" cy="197" r=".8"/><circle cx="1023" cy="92" r=".7"/><circle cx="97" cy="192" r=".8"/></g>
+   <g id="distant-mountains" filter="url(#far-soft)"><path d="M0 669L137 563L220 620L377 531L510 634L666 548L770 593L879 511L1008 607L1161 531L1252 578L1430 490L1600 601V900H0Z" fill="#668188" opacity=".45"/><path d="M0 757L184 647L291 689L452 609L580 705L756 636L936 720L1075 611L1197 687L1355 602L1485 650L1600 615V900H0Z" fill="#416875" opacity=".55"/></g>
+   <g class="ambient cloud-far" fill="url(#cloud-dark)" filter="url(#cloud-soft)"><path d="M-100 591Q33 520 176 562Q239 506 355 551Q440 508 591 567Q739 524 850 586Q1019 533 1170 580Q1311 524 1472 568Q1558 536 1710 592V732H-100Z"/><path d="M-90 443Q165 391 345 422Q463 389 664 432Q778 393 927 419Q1171 383 1363 433Q1515 399 1710 421V461H-90Z" opacity=".25"/></g>
+   <g class="scene-art art-home">
+    <ellipse cx="988" cy="676" rx="225" ry="25" fill="#153b4b" opacity=".18" filter="url(#cloud-soft)"/>
+    <g id="floating-city" class="ambient floating"><use href="#city-shape" transform="translate(992 367) scale(1.05)"/></g>
+    <path d="M1311 555l-12 21 6 19 20-8 8-21ZM702 621l-12 15 9 28 14-17Z" fill="#365351" opacity=".8"/>
+   </g>
+   <g class="scene-art art-cloud">
+    <g class="cloud-city"><g class="ambient floating"><use href="#city-shape" transform="translate(1065 322) scale(.52)" opacity=".88"/></g></g>
+    <g fill="url(#cloud-light)" filter="url(#cloud-soft)"><path d="M-90 578Q78 451 243 526Q298 440 456 496Q574 435 705 511Q828 480 924 548Q1123 473 1327 531Q1477 453 1681 535V805H-90Z"/><path d="M-30 730Q163 584 344 671Q435 576 603 648Q800 568 1008 677Q1202 582 1386 663Q1567 589 1692 682V900H-30Z" opacity=".7"/></g>
+    <path d="M502 557Q714 535 874 562M1176 493Q1351 479 1500 513M749 684Q915 644 1112 681" fill="none" stroke="#f0ddbc" stroke-opacity=".3" stroke-width="3"/>
+   </g>
+   <g class="scene-art art-courtyard">
+    <rect width="1600" height="900" fill="#143333" opacity=".25"/>
+    <g opacity=".65"><path d="M631 503V376h23V349h22V369h37V395h26V369h31V343h21V365h45V389h24V350h30V321h18V348h34V494Z" fill="url(#stone)"/><path d="M624 413H951V591H624Z" fill="url(#stone-lit)"/><path d="M624 413H951V591H624Z" fill="url(#masonry)"/><use href="#arch" transform="translate(657 450) scale(.9 1.4)"/><use href="#arch" transform="translate(726 450) scale(.9 1.4)"/><use href="#arch" transform="translate(795 450) scale(.9 1.4)"/><use href="#arch" transform="translate(863 450) scale(.9 1.4)"/></g>
+    <path d="M517 652L1060 560L1600 672V900H359Z" fill="#29494b"/>
+    <path d="M870 641L1040 599L1125 641L1326 900H606Z" fill="url(#stone)"/>
+    <g fill="none" stroke="#afb295" stroke-opacity=".38" stroke-width="3"><path d="M830 688H1162M795 730H1195M751 778H1237M704 832H1283M653 888H1323"/><path d="M1038 609L964 900M1067 614L1177 900" opacity=".5"/></g>
+    <g id="ancient-tree"><use href="#tree-shape" transform="translate(1034 299) scale(1.7)"/><path d="M1001 651Q936 715 885 713Q823 708 766 753M1020 659Q988 751 1054 809Q1085 837 1071 883M1067 657Q1187 699 1210 763Q1225 802 1300 817" fill="none" stroke="url(#bark)" stroke-width="24"/><path d="M1000 658Q952 719 889 723M1041 753Q1065 802 1057 855M1206 763Q1226 792 1260 798" fill="none" stroke="#b6a67d" stroke-width="3" opacity=".5"/></g>
+    <g fill="url(#stone-lit)"><path d="M1391 401V302h79V382h31V690h-118Z"/><path d="M1452 357Q1572 338 1609 407V439Q1544 386 1465 412Z"/><path d="M508 646V539h32V510h22V538h27V660Z"/><path d="M409 767V653h31V626h27V654h34V778Z"/></g>
+    <path d="M1400 302h59M1391 401h101M1391 457h109M1386 517h111M1390 578h107M1393 637h99" stroke="#c0b899" stroke-opacity=".23" stroke-width="3"/>
+    <path d="M1471 316Q1431 382 1452 477Q1477 560 1433 643M500 649Q526 651 534 699Q539 724 570 726" fill="none" stroke="#335e4b" stroke-width="10"/>
+    <g fill="#729073"><ellipse cx="1455" cy="377" rx="16" ry="6" transform="rotate(-28 1455 377)"/><ellipse cx="1438" cy="418" rx="18" ry="7" transform="rotate(32 1438 418)"/><ellipse cx="1465" cy="510" rx="18" ry="7" transform="rotate(-24 1465 510)"/><ellipse cx="1450" cy="583" rx="18" ry="7" transform="rotate(29 1450 583)"/></g>
+    <path d="M-50 900L334 812L541 873L689 845L829 900M1240 900L1402 801L1639 771V900" fill="#123737"/>
+   </g>
+   <g class="scene-art art-tower">
+    <rect width="1600" height="900" fill="url(#sunset)"/>
+    <g class="tower-light"><ellipse cx="1225" cy="445" rx="425" ry="335" fill="url(#sun-halo)" class="ambient sun-glow"/>
+    <circle cx="1225" cy="443" r="67" fill="#f6d9a3" opacity=".86"/></g>
+    <path d="M0 711L180 563L306 650L467 532L613 632L767 555L963 690L1124 568L1277 646L1430 545L1600 623V900H0Z" fill="#6e8284" opacity=".6"/>
+    <path d="M0 787L251 645L389 747L633 643L761 750L978 647L1130 770L1360 636L1600 738V900H0Z" fill="#416676" opacity=".65"/>
+    <g class="ambient cloud-far" fill="url(#cloud-light)" filter="url(#cloud-soft)"><path d="M-75 747Q102 650 298 709Q441 654 616 726Q806 665 1000 733Q1150 656 1329 715Q1497 649 1670 736V900H-75Z"/></g>
+    <g id="sun-tower">
+     <path d="M873 900L931 511H1080L1147 900Z" fill="url(#stone-lit)"/>
+     <path d="M1046 900L1022 514H1080L1147 900Z" fill="#afa488" opacity=".45"/>
+     <path d="M915 548L937 453H1073L1091 548Z" fill="#6a8076"/>
+     <path d="M926 457V395H951V421h28V383h29V421h28V395h25V457Z" fill="url(#stone-lit)"/>
+     <path d="M951 421V304L968 286V268h23V291h26V275h19V304h15V421Z" fill="url(#stone)"/>
+     <path d="M1018 308V421h31V308Z" fill="#aba58a" opacity=".58"/>
+     <path d="M945 302L1000 231L1060 304Z" fill="#4c6f64"/>
+     <path d="M1000 231L1060 304H1033Z" fill="#baae86" opacity=".63"/>
+     <path d="M1000 238V188" stroke="#c9b484" stroke-width="3"/><path d="M1001 191Q1038 191 1051 204Q1026 199 1002 219Z" fill="#c4af80" opacity=".8"/>
+     <use href="#arch" transform="translate(974 330) scale(.9 .85)"/>
+     <path d="M952 621V584Q952 556 972 556Q992 556 992 584V621Z" fill="#173541"/><path d="M1020 622V584Q1020 555 1037 555Q1055 555 1055 584V622Z" fill="#284645"/>
+     <path d="M959 605V584Q959 568 970 568" fill="none" stroke="#c6b58f" stroke-width="2" opacity=".6"/>
+     <path d="M908 706H1113M899 763H1125M890 824H1136M916 645H1103M927 552H1090" fill="none" stroke="#c1b79b" stroke-width="4" opacity=".55"/>
+     <path d="M906 713L1109 713L1134 900H876Z" fill="url(#masonry)"/>
+     <path d="M949 456Q929 503 952 549Q976 602 942 660Q919 711 939 752" fill="none" stroke="#345947" stroke-width="9"/>
+     <path d="M949 484l-15 11m15 29 18 7m-14 39-17 10m8 39 18 8m-28 38-15 4m9 32 17 13m-9 20-21 3" stroke="#7e906d" stroke-width="6" stroke-linecap="round"/>
+     <path d="M745 900L803 805H897V900ZM1119 900V786H1267L1341 900Z" fill="url(#stone)"/>
+     <path d="M806 806h30v-28h21v27h24v-20h21M1137 789v-23h23v23h25v-32h24v31h30v-18h21v28" fill="none" stroke="#839282" stroke-width="13"/>
+    </g>
+    <path d="M1352 743l29-45 32 45 8 108h-77Z" fill="#35555a" opacity=".7"/>
+    <path d="M1310 851H1452V900H1294Z" fill="#345257" opacity=".7"/>
+   </g>
+   <g class="ambient cloud-near" fill="url(#cloud-light)" filter="url(#cloud-soft)" opacity=".78"><path d="M-130 761Q10 629 171 699Q231 611 379 678Q470 617 632 715Q759 663 840 733Q1011 676 1162 743Q1318 665 1481 713Q1624 667 1734 735V946H-130Z"/><path d="M-111 825Q123 734 328 784Q472 725 651 807Q804 754 1006 816Q1224 752 1391 812Q1534 761 1745 817V950H-111Z" opacity=".6"/></g>
+   <g class="ambient birds"><use href="#bird" x="773" y="264"/><use href="#bird" transform="translate(748 287) scale(.7)"/><use href="#bird" transform="translate(811 278) scale(.65)"/><use href="#bird" transform="translate(783 308) scale(.5)"/></g>
+   <g class="ambient birds slow" opacity=".55"><use href="#bird" transform="translate(1215 534) scale(.7)"/><use href="#bird" transform="translate(1252 514) scale(.5)"/><use href="#bird" transform="translate(1281 541) scale(.6)"/></g>
+   <g fill="#f2d197"><circle class="ambient mote" cx="778" cy="401" r="1.5"/><circle class="ambient mote" cx="912" cy="508" r="1.2"/><circle class="ambient mote" cx="1089" cy="545" r="1.5"/><circle class="ambient mote" cx="1275" cy="619" r="1"/><circle class="ambient mote" cx="704" cy="581" r="1.3"/><circle class="ambient mote" cx="1012" cy="637" r="1.6"/><circle class="ambient mote" cx="1331" cy="384" r="1.2"/><circle class="ambient mote" cx="864" cy="676" r="1.2"/></g>
+  </svg>
+  </div>
+  <div class="atmosphere" aria-hidden="true"></div>
+  <svg class="grain" width="100%" height="100%" aria-hidden="true"><rect width="100%" height="100%" filter="url(#paper-grain)" opacity=".65"/></svg>
+  <div class="vignette" aria-hidden="true"></div>
+  <header class="scene-topbar">
+   <div class="wordmark"><div class="brand-seal" aria-hidden="true"><span>空</span></div><div>天空之城<small>THE CITY ABOVE THE CLOUDS</small></div></div>
+   <div class="top-actions"><span id="mode-label" class="mode-label">云上漫游 · 静态观赏</span><button id="back-home" class="text-button interactive" type="button" hidden aria-label="返回天空之城首页">← 返回全景</button></div>
+  </header>
+  <section class="scene-copy" aria-labelledby="scene-title">
+   <p id="scene-eyebrow" class="eyebrow">LAPUTA · A QUIET JOURNEY</p>
+   <h1 id="scene-title" tabindex="-1">天空之城</h1>
+   <p id="scene-tagline" class="scene-tagline">云的尽头，风的故乡。</p>
+   <div class="copy-divider" aria-hidden="true"></div>
+   <p id="scene-description">在云海之上，寻找一座不会坠落的城。<br>让目光停留，让时间慢下来。</p>
+   <p class="scene-index" aria-hidden="true"><strong id="scene-number">00</strong> &nbsp; / &nbsp; 03 &nbsp; — &nbsp; <span id="scene-english">THE FLOATING CITY</span></p>
+  </section>
+  <nav id="scene-hotspots" class="scene-hotspots interactive" aria-label="选择观赏场景">
+   <button class="hotspot" data-scene="cloud" type="button" aria-label="进入云海远景"><span class="marker" aria-hidden="true">01</span><span><span class="label">云海远景</span><span class="hint">循着风，去往天际 →</span></span></button>
+   <button class="hotspot" data-scene="courtyard" type="button" aria-label="进入城堡中庭"><span class="marker" aria-hidden="true">02</span><span><span class="label">城堡中庭</span><span class="hint">听巨树与遗迹的低语 →</span></span></button>
+   <button class="hotspot" data-scene="tower" type="button" aria-label="进入高塔夕照"><span class="marker" aria-hidden="true">03</span><span><span class="label">高塔夕照</span><span class="hint">留住最后一束光 →</span></span></button>
+  </nav>
+  <footer class="scene-controls">
+   <div id="view-note" class="view-note"><span>一座城，一场安静的漫游。</span>暮色 · 云海 · 古老的风</div>
+   <div class="control-right"><span id="coordinate" class="coordinate" aria-hidden="true">ALT. ∞ &nbsp; / &nbsp; DUSK 18:42</span><button id="motion-toggle" class="motion-button interactive" type="button" aria-pressed="false" aria-label="暂停装饰动画"><span class="motion-icon" aria-hidden="true"></span><span id="motion-label">暂停动画</span></button></div>
+  </footer>
+  <div id="scene-transition" class="scene-transition" aria-hidden="true"><span id="transition-title">云海远景</span><small>FOLLOW THE WIND</small></div>
+  <p id="scene-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+  <noscript>当前为静态全景。启用 JavaScript 后，可以点击入口进入云海、中庭与高塔，并控制环境动画。</noscript>
+ </div>
+</main>
+<script>
+(() => {
+ 'use strict';
+ const scenes = {
+  home:{title:'天空之城',tagline:'云的尽头，风的故乡。',description:'在云海之上，寻找一座不会坠落的城。\n让目光停留，让时间慢下来。',number:'00',english:'THE FLOATING CITY',eyebrow:'LAPUTA · A QUIET JOURNEY',note:'点击画面入口，走进这座城。',detail:'暮色 · 云海 · 古老的风'},
+  cloud:{title:'云海远景',tagline:'万里长风，托起一座孤城。',description:'晚霞沉入层叠的云，飞鸟掠过天际。\n远方的城，像一个尚未醒来的梦。',number:'01',english:'AN OCEAN OF CLOUDS',eyebrow:'CHAPTER I · THE HORIZON',note:'此刻，只有风与云经过。',detail:'按 Esc 返回全景'},
+  courtyard:{title:'城堡中庭',tagline:'树根深处，藏着时间的回声。',description:'拱廊渐渐被藤蔓覆盖，石阶通向巨树。\n那些被遗忘的岁月，仍然在这里生长。',number:'02',english:'THE ANCIENT GARDEN',eyebrow:'CHAPTER II · THE ROOTS',note:'停一会儿，听树叶的低语。',detail:'按 Esc 返回全景'},
+  tower:{title:'高塔夕照',tagline:'在风的最高处，与落日相逢。',description:'铜金色的光，沿着古老塔楼缓缓落下。\n群山与云海，把最后的黄昏交给你。',number:'03',english:'THE LAST GOLDEN LIGHT',eyebrow:'CHAPTER III · THE SUNLIGHT',note:'把这一束光，留在记忆里。',detail:'按 Esc 返回全景'}
+ };
+ const app=document.getElementById('scene-app');
+ const title=document.getElementById('scene-title');
+ const description=document.getElementById('scene-description');
+ const tagline=document.getElementById('scene-tagline');
+ const eyebrow=document.getElementById('scene-eyebrow');
+ const number=document.getElementById('scene-number');
+ const english=document.getElementById('scene-english');
+ const hotspots=document.getElementById('scene-hotspots');
+ const back=document.getElementById('back-home');
+ const motion=document.getElementById('motion-toggle');
+ const motionLabel=document.getElementById('motion-label');
+ const mode=document.getElementById('mode-label');
+ const note=document.getElementById('view-note');
+ const transitionTitle=document.getElementById('transition-title');
+ const status=document.getElementById('scene-status');
+ const preference=window.matchMedia('(prefers-reduced-motion: reduce)');
+ let current='home', transitioning=false, manuallyPaused=false, returnTarget=null;
+ let switchTimer=null, endTimer=null, transitionFrame=null, pending=null;
+ const textWithLines=(element,text) => {
+  element.replaceChildren();
+  text.split('\n').forEach((line,index) => {
+   if(index) element.append(document.createElement('br'));
+   element.append(document.createTextNode(line));
+  });
+ };
+ function render(scene,focus=false) {
+  current=scene;
+  const config=scenes[scene];
+  app.dataset.scene=scene;
+  title.textContent=config.title;
+  tagline.textContent=config.tagline;
+  textWithLines(description,config.description);
+  eyebrow.textContent=config.eyebrow;
+  number.textContent=config.number;
+  english.textContent=config.english;
+  back.hidden=scene==='home';
+  hotspots.hidden=scene!=='home';
+  const lead=document.createElement('span'); lead.textContent=config.note;
+  note.replaceChildren(lead,document.createTextNode(config.detail));
+  document.title=config.title+' · 云上漫游';
+  if(focus) {
+   status.textContent='当前场景：'+config.title;
+   if(scene==='home' && returnTarget?.isConnected) returnTarget.focus({preventScroll:true});
+   else title.focus({preventScroll:true});
+  }
+ }
+ function unlock() {
+  app.classList.remove('is-transitioning');
+  app.removeAttribute('aria-busy');
+  transitioning=false; pending=null;
+ }
+ function goToScene(requested,trigger=null) {
+  if(transitioning) return;
+  const next=Object.hasOwn(scenes,requested)?requested:'home';
+  if(next===current) return;
+  if(current==='home' && trigger) returnTarget=trigger;
+  if(preference.matches) { render(next,true); return; }
+  transitioning=true; pending=next;
+  app.setAttribute('aria-busy','true');
+  transitionTitle.textContent=scenes[next].title;
+  transitionFrame=requestAnimationFrame(() => {
+   transitionFrame=null;
+   app.classList.add('is-transitioning');
+   switchTimer=setTimeout(() => {
+    switchTimer=null;
+    render(next,true);
+    app.classList.remove('is-transitioning');
+    endTimer=setTimeout(() => {endTimer=null;unlock();},320);
+   },330);
+  });
+ }
+ function syncMotion() {
+  const reduced=preference.matches;
+  app.classList.toggle('is-paused',manuallyPaused || reduced || document.hidden);
+  motion.disabled=reduced;
+  motion.setAttribute('aria-pressed',String(manuallyPaused));
+  motionLabel.textContent=reduced?'静态观赏':manuallyPaused?'继续动画':'暂停动画';
+  motion.setAttribute('aria-label',reduced?'系统已启用减少动态效果':manuallyPaused?'继续装饰动画':'暂停装饰动画');
+  mode.textContent=reduced?'减少动态 · 静态观赏':manuallyPaused?'观赏模式 · 已暂停':'观赏模式 · 自动播放';
+ }
+ hotspots.querySelectorAll('button[data-scene]').forEach(button => {
+  button.addEventListener('click',() => goToScene(button.dataset.scene,button));
+ });
+ back.addEventListener('click',() => goToScene('home'));
+ motion.addEventListener('click',() => {manuallyPaused=!manuallyPaused;syncMotion();});
+ document.addEventListener('keydown',event => {if(event.key==='Escape') goToScene('home');});
+ document.addEventListener('visibilitychange',syncMotion);
+ preference.addEventListener('change',() => {
+  if(preference.matches && transitioning) {
+   if(transitionFrame!==null) cancelAnimationFrame(transitionFrame);
+   clearTimeout(switchTimer); clearTimeout(endTimer);
+   transitionFrame=switchTimer=endTimer=null;
+   if(pending) render(pending,true);
+   unlock();
+  }
+  syncMotion();
+ });
+ render('home'); syncMotion(); app.classList.add('is-ready');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#162d39">
+  <meta name="description" content="二十幅官方原片静止画，重访《天空之城》的飞行、遗迹与空中庭园。">
+  <title>天空之城 · 原片二十景</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="#17" aria-label="天空之城，返回空中庭园"><span class="brand-mark">✦</span><span>天空之城<small>CASTLE IN THE SKY · 原动画场景画廊</small></span></a>
+    <div class="top-actions">
+      <button id="chapterButton" class="quiet" type="button" aria-haspopup="dialog">场景目录 <span>⌄</span></button>
+      <button id="motionButton" class="icon-button" type="button" title="暂停环境动效" aria-label="暂停环境动效">◌</button>
+      <button id="fullscreenButton" class="icon-button" type="button" title="全屏" aria-label="全屏">⛶</button>
+    </div>
+  </header>
+
+  <main class="shell">
+    <div class="intro"><span id="chapterLabel" class="eyebrow">第四章 · 失落的城</span><span class="intro-rule"></span><span class="hint">点击画面中的路标，走进下一段记忆</span></div>
+    <section class="stage" aria-label="场景画面">
+      <div class="art-frame" id="artFrame">
+        <img id="sceneImage" src="artwork/originals/laputa039.jpg" alt="空中庭园" decoding="async">
+        <div class="art-vignette" aria-hidden="true"></div>
+        <div class="ambient" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="scene-stamp"><span id="sceneNumber">17 / 20</span><span class="stamp-line"></span><span>CASTLE IN THE SKY</span></div>
+        <div id="hotspots" class="hotspots"></div>
+        <div class="art-caption"><span class="caption-rule"></span><div><p id="sceneChapter">失落的城</p><h1 id="sceneTitle">空中庭园</h1><p id="sceneDescription">树木与石径占据了天空之城的心脏。</p></div></div>
+      </div>
+      <div id="imageError" class="error" role="alert" hidden>画面尚未就绪。请在仓库根目录运行 python scripts/fetch_official_assets.py，获取官方剧照后刷新页面。</div>
+    </section>
+
+    <nav class="controls" aria-label="场景导航">
+      <div class="controls-left"><button id="prevButton" class="nav-button" type="button">← <span>上一景</span></button><button id="nextButton" class="nav-button" type="button"><span>下一景</span> →</button></div>
+      <div class="scene-progress"><span id="progressNumber">17</span><span class="progress-track"><i id="progressFill"></i></span><span>20</span></div>
+      <div class="controls-right"><button id="startButton" class="text-button" type="button">从头开始</button><button id="homeButton" class="text-button" type="button">回到庭园</button><button id="tourButton" class="tour-button" type="button" aria-pressed="false">▷ 自动巡游</button></div>
+    </nav>
+    <div id="mobileDestinations" class="mobile-destinations" aria-label="当前场景可前往的位置"></div>
+    <p class="footnote">二十幅原片静止画，从矿镇到云海。使用 ← → 翻景，或打开目录自由浏览。</p>
+    <p class="credit">画面来源：<a href="https://www.ghibli.jp/works/laputa/" target="_blank" rel="noopener noreferrer">Studio Ghibli 官方《天空の城ラピュタ》作品静止画</a> · © 1986 Hayao Miyazaki / Studio Ghibli。页面本身可离线使用，点击来源链接需要联网。</p>
+  </main>
+
+  <div id="directory" class="dialog-backdrop" hidden>
+    <section class="directory" role="dialog" aria-modal="true" aria-labelledby="directoryTitle" tabindex="-1">
+      <div class="directory-header"><div><p class="eyebrow">TWENTY MOMENTS ABOVE THE CLOUDS</p><h2 id="directoryTitle">选择一处风景</h2></div><button id="closeDirectory" class="close-button" type="button" aria-label="关闭目录">×</button></div>
+      <div id="directoryContent" class="directory-content"></div>
+    </section>
+  </div>
+  <script src="scenes.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
+
+

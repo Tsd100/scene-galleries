@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.npm-cache/
+.browser-profiles/
+artifacts/
+**/artwork/originals/
+**/assets/*.jpg
+**/assets/*.png
+**/assets/thumbs/*.jpg
+**/assets/thumbs/*.png
+*.log
+__pycache__/
+*.pyc

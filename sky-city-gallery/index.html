@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#182528">
+  <title>天空之城 · 云上海图</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="#07" aria-label="天空之城，返回巨树庭院"><span class="brand-mark">✦</span><span>天空之城<small>云上海图 · 手绘场景漫游</small></span></a>
+    <div class="top-actions">
+      <button id="chapterButton" class="quiet" type="button" aria-haspopup="dialog">场景目录 <span>⌄</span></button>
+      <button id="motionButton" class="icon-button" type="button" title="暂停环境动效" aria-label="暂停环境动效">◌</button>
+      <button id="fullscreenButton" class="icon-button" type="button" title="全屏" aria-label="全屏">⛶</button>
+    </div>
+  </header>
+
+  <main class="shell">
+    <div class="intro"><span id="chapterLabel" class="eyebrow">第二章 · 遗迹之门</span><span class="intro-rule"></span><span class="hint">点击画面中的路标，走进下一处风景</span></div>
+    <section class="stage" aria-label="场景画面">
+      <div class="art-frame" id="artFrame">
+        <img id="sceneImage" src="assets/07-tree-courtyard.webp" alt="巨树庭院" decoding="async">
+        <div class="art-vignette" aria-hidden="true"></div>
+        <div class="ambient" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="scene-stamp"><span id="sceneNumber">07 / 16</span><span class="stamp-line"></span><span>SKY CITY</span></div>
+        <div id="hotspots" class="hotspots"></div>
+        <div class="art-caption"><span class="caption-rule"></span><div><p id="sceneChapter">遗迹之门</p><h1 id="sceneTitle">巨树庭院</h1><p id="sceneDescription">一座城的心脏，在树根与水纹之间安静呼吸。</p></div></div>
+      </div>
+      <div id="imageError" class="error" role="alert" hidden>画面暂时无法读取。请保持 <code>assets</code> 文件夹与此页面放在一起。</div>
+    </section>
+
+    <nav class="controls" aria-label="场景导航">
+      <div class="controls-left"><button id="prevButton" class="nav-button" type="button">← <span>上一景</span></button><button id="nextButton" class="nav-button" type="button"><span>下一景</span> →</button></div>
+      <div class="scene-progress"><span id="progressNumber">07</span><span class="progress-track"><i id="progressFill"></i></span><span>16</span></div>
+      <div class="controls-right"><button id="startButton" class="text-button" type="button">从头开始</button><button id="homeButton" class="text-button" type="button">回到巨树</button><button id="tourButton" class="tour-button" type="button" aria-pressed="false">▷ 自动巡游</button></div>
+    </nav>
+    <div id="mobileDestinations" class="mobile-destinations" aria-label="当前场景可前往的位置"></div>
+    <p class="footnote">一座浮岛，十六段停留。使用 ← → 翻景，或打开目录自由漫游。</p>
+  </main>
+
+  <div id="directory" class="dialog-backdrop" hidden>
+    <section class="directory" role="dialog" aria-modal="true" aria-labelledby="directoryTitle" tabindex="-1">
+      <div class="directory-header"><div><p class="eyebrow">THE ATLAS OF LAPUTA</p><h2 id="directoryTitle">选择一处风景</h2></div><button id="closeDirectory" class="close-button" type="button" aria-label="关闭目录">×</button></div>
+      <div id="directoryContent" class="directory-content"></div>
+    </section>
+  </div>
+  <script src="scenes.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
