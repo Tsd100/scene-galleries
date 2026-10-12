@@ -1,10 +1,11 @@
 # 场景漫游作品集
 
-五个浏览器场景项目，加一份早期单页作品。原创插画画廊可直接离线打开；两套官方剧照画廊需要先下载素材；3D 场景需要先构建。
+六个浏览器场景项目，加一份早期单页作品。原创插画画廊可直接离线打开；两套官方剧照画廊需要先下载素材；3D 场景需要先构建。
 
 | 项目 | 内容 | 运行方式 |
 | --- | --- | --- |
 | [千与千寻场景画廊](spirited-away/index.html) | 12 个场景，原创生成插画 | 双击 index.html |
+| [幽灵公主场景画廊](princess-mononoke-gallery/index.html) | 16 个场景，原创生成插画 | 双击 index.html |
 | [天空之城插画画廊](sky-city-gallery/index.html) | 16 个场景，原创生成插画 | 双击 index.html |
 | [天空之城 3D 空间](sky-city-3d/) | 连续空间漫游 | Node.js 安装并构建 |
 | [天空之城剧照画廊](laputa-original-gallery/index.html) | 20 个场景，官方剧照 | 先运行素材获取脚本 |
@@ -21,7 +22,7 @@
 ## 项目结构与许可
 
 - 根目录 `index.html`：作品导航页。
-- `spirited-away/`、`sky-city-gallery/`：自带运行素材的静态画廊。
+- `spirited-away/`、`princess-mononoke-gallery/`、`sky-city-gallery/`：自带运行素材的静态画廊。
 - `laputa-original-gallery/`、`wind-rises-gallery/`：播放器和场景资料；本地剧照由脚本获取。
 - `sky-city-3d/`：Three.js / Vite 浏览器场景。
 - `legacy/sky-city.html`：早期单文件版本，保留供对照。
